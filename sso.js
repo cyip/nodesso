@@ -31,7 +31,7 @@ http.createServer(function(request, response) {
             } else {
                 sys.puts("success");
 		var session = new Session();
-		session.token = var token = session.randomToken();
+		var token = session.token = session.randomToken();
 		session.username = params['username'];
                 response.writeHead(200, { "Content-Type" : "text/plain" });
                 response.write(JSON.stringify({token: token}));
@@ -51,7 +51,7 @@ http.createServer(function(request, response) {
                 response.writeHead(200, { "Content-Type" : "text/plain" });
                 response.write(JSON.stringify({tokenValid: "true"}));
                 response.end();
-                session.save();
+                session.save(); //renew token expiry
             }
 	});
     }
