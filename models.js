@@ -6,6 +6,7 @@ function defineModels(mongoose, fn) {
         username    : { type: String, unique: true }
       , password    : String
       , realm       : String
+      , otp_required: { type: Boolean, default: false }
 //      , static: {
 //            authenticate: function(username, password) {
 //                return this.find({username: username, password: password});
@@ -71,6 +72,7 @@ function defineModels(mongoose, fn) {
 
     mongoose.model('User', User);
     mongoose.model('Session', Session);
+    mongoose.model('Otp', Session);
 
     fn();
 }

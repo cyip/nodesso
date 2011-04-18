@@ -13,6 +13,7 @@ var token_emitter = new events.EventEmitter();
 
 models.defineModels(mongoose, function() {
     User = mongoose.model('User');
+    Otp = mongoose.model('Otp');
     Session = mongoose.model('Session');
     db   = mongoose.connect('mongodb://localhost/test');
 })
@@ -29,20 +30,46 @@ http.createServer(function(request, response) {
                 response.write(JSON.stringify({token: "fail"}));
                 response.end();
             } else {
-                sys.puts("success");
-		var session = new Session();
-		var token = session.token = session.randomToken();
-		session.username = params['username'];
+                if(user.otp_required) {
+                    var otpSession = new Otp();
+                    var otp = otpSession.token = otpSession.randomToken();
+                    response.writeHead(200, { "Content-Type" : "text/plain" });
+                    response.write(JSON.stringify({otp: otp}));
+                    response.end();
+                    otpSession.save();
+                } else {
+                    sys.puts("success");
+                    var session = new Session();
+                    var token = session.token = session.randomToken();
+                    session.username = params['username'];
+                    response.writeHead(200, { "Content-Type" : "text/plain" });
+                    response.write(JSON.stringify({token: token}));
+                    response.end();
+                    session.save();
+                }
+            }
+        });
+    } else if(uri === "/otp_exchange.json") {
+        sys.puts("/otp_exchange.json")
+        Otp.findOne({token: params['otp']}, function(err, otp) {
+            if(!otp) {
+                sys.puts("failed");
+                response.writeHead(401, { "Content-Type" : "text/plain" });
+                response.write(JSON.stringify({token: "fail"}));
+                response.end();
+            } else {
+                var session = new Session();
+                var token = session.token = session.randomToken();
+                session.username = params['username'];
                 response.writeHead(200, { "Content-Type" : "text/plain" });
                 response.write(JSON.stringify({token: token}));
                 response.end();
-		session.save();
+                session.save();
             }
         });
-    }
-    else if(uri === "/token_valid.json") {
+    } else if(uri === "/token_valid.json") {
         sys.puts("/token_valid.json");
-	Session.findOne({token: params['token']}, function(err, session) {
+        Session.findOne({token: params['token']}, function(err, session) {
             if(!session) {
                 response.writeHead(401, { "Content-Type" : "text/plain" });
                 response.write(JSON.stringify({tokenValid: "false"}));
@@ -63,6 +90,7 @@ http.createServer(function(request, response) {
 }).listen(8080);
 
 function purge_tokens() {
+    // Purge expired tokens
 }
 
 setInterval(purge_tokens, 5000);
