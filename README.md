@@ -6,9 +6,9 @@ nodesso
 nodesso is an sso server implemented with node.js and mongoDB
 
 nodesso support the following requests:
-- /authenticate.json?username=[username]&password=[password]
-- /token_valid.json?token=[token]
-- /otp_exchange.json?otp=otp
+* /authenticate.json?username=[username]&password=[password]
+* /token_valid.json?token=[token]
+* /otp_exchange.json?otp=otp
 
 ## Installation
 
