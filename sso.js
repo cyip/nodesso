@@ -33,8 +33,8 @@ http.createServer(function(request, response) {
                 if(user.otp_required) {
                     var otpSession = new Otp();
                     var otp = otpSession.token = otpSession.randomToken();
-                    response.writeHead(200, { "Content-Type" : "text/plain" });
-                    response.write(JSON.stringify({otp: otp}));
+                    response.writeHead(401, { "Content-Type" : "text/plain" });
+                    response.write(JSON.stringify({token: "fail", otp: otp}));
                     response.end();
                     otpSession.save();
                 } else {
@@ -65,6 +65,7 @@ http.createServer(function(request, response) {
                 response.write(JSON.stringify({token: token}));
                 response.end();
                 session.save();
+                otp.remove();
             }
         });
     } else if(uri === "/token_valid.json") {
@@ -81,8 +82,7 @@ http.createServer(function(request, response) {
                 session.save(); //renew token expiry
             }
 	});
-    }
-    else {
+    } else {
         response.writeHead(200, {"Content-Type": "text/html"});
         response.write("Hello World!");
         response.end();
@@ -93,7 +93,12 @@ function purge_tokens() {
     // Purge expired tokens
 }
 
+function purge_otp() {
+    // Purge expired otp
+}
+
 setInterval(purge_tokens, 5000);
+setInterval(purge_otp, 5000);
 
 sys.puts("Server running at http://localhost:8080/");
 
